@@ -1,6 +1,6 @@
 from dotenv import dotenv_values
 from src.extract.youtube_api import fetch_video_data
-from src.transform.transform_data import clean_title,convert_views,convert_duration,convert_published_date
+from src.transform.transform_data import transform_video_data
 
 
 # Cargar variables de entorno desde .env
@@ -14,8 +14,14 @@ def main():
             config["YOUTUBE_CHANNEL_ID"],
             config["YOUTUBE_MAX_RESULTS"]
         )
-        print("Datos obtenidos de YouTube:")
+        print("Datos obtenidos de YouTube")
         print(video_data)
+
+        transformed_data = transform_video_data(video_data)
+
+        print("Datos transformados")
+        print(transformed_data)
+
     except Exception as e:
         print(f"Error al obtener datos de YouTube: {e}")
 

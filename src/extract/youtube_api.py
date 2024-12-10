@@ -21,13 +21,15 @@ def extract_video_metadata(video_response):
             video_id = video['id'] # ID único del video
             duration = video['contentDetails']['duration']  # Duración del video en formato ISO 8601 (ejemplo: PT1H2M3S)
             views = video['statistics'].get('viewCount', 'No disponible')  # Número de vistas, si está disponible
+            published_at = video['snippet']['publishedAt']  # Fecha de publicación del video
 
             # Guardamos los metadatos extraídos en la lista 'videos'
             videos.append({
                 'title': title,
                 'id': video_id,
                 'duration': duration,
-                'views': views
+                'views': views,
+                'publishedAt': published_at
             })
     except KeyError as e:
         print(f"Error al acceder a una clave de la respuesta de la API: {e}")
