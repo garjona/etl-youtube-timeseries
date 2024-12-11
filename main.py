@@ -21,12 +21,10 @@ def main():
             config["YOUTUBE_MAX_RESULTS"]
         )
         print("Datos obtenidos de YouTube")
-        print(video_data)
 
         transformed_data = transform_video_data(video_data)
 
         print("Datos transformados")
-        print(transformed_data)
 
         # Establecemos la conexión con la base de datos
         conn, cursor = connect_db(
@@ -36,7 +34,6 @@ def main():
             config["DB_PASSWORD"],
             int(config["DB_PORT"])
         )
-        print("Conectado a la base de datos")
 
         # Se insertan los datos transformados a las tablas correspondientes
         insert_video_data(conn, cursor, transformed_data, process_start_time)

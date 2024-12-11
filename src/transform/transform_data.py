@@ -1,5 +1,7 @@
 import re
 from datetime import datetime
+import pytz
+from datetime import timedelta
 
 def convert_duration(duration):
     """
@@ -21,20 +23,29 @@ def convert_duration(duration):
         seconds = int(match.group(3) or 0)  # Si no hay segundos, asignamos 0
 
         # Formateamos como hh:mm:ss
-        return f"{hours:02}:{minutes:02}:{seconds:02}"
+        return timedelta(hours=hours, minutes=minutes, seconds=seconds)
+        #return f"{hours:02}:{minutes:02}:{seconds:02}"
     return "00:00:00"  # Si no se puede parsear, devolvemos "00:00:00"
 
 def convert_published_date(published_at):
     """
-    Convierte la fecha de publicación de formato ISO 8601 a un objeto datetime de Python.
+    Convierte la fecha de publicación en formato ISO 8601 a un objeto datetime de Python en UTC.
 
     Args:
         published_at (str): Fecha de publicación en formato ISO 8601 (ej. "2024-12-09T10:30:00Z").
 
     Returns:
-        datetime: Objeto datetime en formato adecuado para PostgreSQL.
+        datetime: Objeto datetime en formato adecuado para PostgreSQL, en UTC.
     """
-    return datetime.strptime(published_at, '%Y-%m-%dT%H:%M:%SZ')
+    # Convertir la fecha en formato ISO 8601 a datetime con la zona horaria incluida
+    dt = datetime.strptime(published_at, '%Y-%m-%dT%H:%M:%SZ')
+    dt = pytz.utc.localize(dt)  # Asegura que el objeto datetime esté en UTC
+
+    # Si ya tiene zona horaria (por ejemplo, UTC), se asegura de que esté en UTC
+    if dt.tzinfo:
+        return dt.astimezone(pytz.utc)  # Convertir a UTC, en caso que la zona horaria no sea UTC
+    else:
+        return dt  # Si ya está en UTC, no se hace ninguna conversión
 
 
 def convert_views(views):

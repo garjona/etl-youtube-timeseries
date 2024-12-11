@@ -1,6 +1,5 @@
 import psycopg2
-from psycopg2 import sql
-from datetime import datetime
+import pytz
 
 def connect_db(host,database,user,password,port):
     """
@@ -27,6 +26,18 @@ def connect_db(host,database,user,password,port):
         print(f"Error al conectar a la base de datos: {e}")
         return None, None
 
+
+def convert_to_utc(dt):
+    """
+    Convierte una fecha a UTC si no tiene zona horaria o la ajusta a UTC si tiene una zona horaria diferente.
+    """
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=pytz.utc)  # Si no tiene zona horaria, asignamos UTC
+    else:
+        dt = dt.astimezone(pytz.utc)  # Si tiene zona horaria, la convertimos a UTC
+    return dt
+
+
 def insert_video_data(conn, cursor, videos, process_start_time):
     """
     Inserta los datos de los videos en las tablas 'video_metadata' y 'youtube_video_data' en la base de datos PostgreSQL.
@@ -36,6 +47,7 @@ def insert_video_data(conn, cursor, videos, process_start_time):
         conn: Conexión a la base de datos.
         cursor: Cursor para ejecutar las consultas.
         videos (list): Lista de diccionarios con los metadatos de los videos.
+        process_start_time: Fecha de inicio de proceso
     """
     try:
         # Definimos las consultas de inserción SQL
@@ -59,6 +71,9 @@ def insert_video_data(conn, cursor, videos, process_start_time):
             duration = video['duration']
             published_at = video['publishedAt']  # Fecha y hora de la publicación del video
 
+            # Se asegura de convertir a UTC antes de insertar en la base de datos
+            published_at = convert_to_utc(published_at)
+
             # Verificar si el video ya existe en video_metadata
             cursor.execute("""
             SELECT title, duration, published_at, version FROM video_metadata WHERE video_id = %s ORDER BY version DESC LIMIT 1
@@ -68,6 +83,9 @@ def insert_video_data(conn, cursor, videos, process_start_time):
             if existing_video:
                 # Si el video existe, comparamos los datos
                 existing_title, existing_duration, existing_published_at, existing_version = existing_video
+
+                # Se convierte la existente published a formato utc
+                existing_published_at = convert_to_utc(existing_published_at)
 
                 # Verificamos si los datos han cambiado
                 if title != existing_title or duration != existing_duration or published_at != existing_published_at:
