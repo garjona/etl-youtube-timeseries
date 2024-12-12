@@ -14,7 +14,7 @@ Este proyecto obtiene, transforma y almacena datos de videos de YouTube en una b
 
 ## Requisitos
 
-Este proyecto requiere Python 3 y las siguientes dependencias que puedes instalar utilizando `pip`:
+Este proyecto requiere Python 3.11 y las siguientes dependencias que puedes instalar utilizando `pip`:
 
 ```bash
 pip install -r requirements.txt
@@ -52,7 +52,7 @@ DB_PASSWORD=<your_db_password>
 
 Asegúrate de reemplazar los valores entre `< >` con tus propios valores.
 
-2. Base de datos PostgreSQL: Asegúrate de tener una base de datos PostgreSQL en funcionamiento. Este proyecto espera que existan las tablas `video_metadata` y `youtube_video_data` con las siguientes estructuras:
+2. Base de datos PostgreSQL: Asegúrate de tener una base de datos PostgreSQL en funcionamiento. Además, necesitarás instalar la extensión TimescaleDB para poder crear y gestionar hypertables. Este proyecto espera que existan las tablas `video_metadata` y `youtube_video_data` con las siguientes estructuras:
 
 ```sql
 CREATE TABLE video_metadata (
@@ -73,7 +73,7 @@ CREATE TABLE youtube_video_data (
     FOREIGN KEY (video_id, metadata_version) REFERENCES video_metadata (video_id, version) ON DELETE CASCADE
 );
 ```
-Convertir la tabla en una hypertable para aprovechar el particionamiento temporal.
+Para aprovechar las ventajas del particionamiento temporal que ofrece TimescaleDB, convierte la tabla `youtube_video_data` en una hypertable, indexándola por la columna timestamp:
 
 ```sql
 SELECT create_hypertable('youtube_video_data', 'timestamp'); 
@@ -94,7 +94,7 @@ Conectará a la base de datos PostgreSQL e insertará los datos transformados en
 
 ### Análisis de Datos
 
-Si deseas realizar un análisis visual de los datos, puedes abrir el archivo Notebook.ipynb en Jupyter Notebook o en cualquier entorno compatible con notebooks de Python. En este notebook, puedes cargar y visualizar los datos almacenados en la base de datos utilizando herramientas como pandas, matplotlib, plotly y dash.
+Si deseas realizar un análisis visual de los datos, puedes abrir el archivo [Notebook.ipynb](https://github.com/garjona/etl-youtube-timeseries/blob/master/notebooks/Notebook.ipynb) en Jupyter Notebook o en cualquier entorno compatible con notebooks de Python. En este notebook, puedes cargar y visualizar los datos almacenados en la base de datos utilizando herramientas como pandas, matplotlib, plotly y dash.
 
 ## Contribuciones
 
